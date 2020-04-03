@@ -50,6 +50,10 @@ def create_nodes_files():
     index_companies_products = 1
     index_comapnies_competitors = 1
 
+    # Unique identifiers
+    products_permalinks = []
+    persons_permalinks = []
+
     line = data.readline()
     while line:
         json_companie = json.loads(line)
@@ -62,9 +66,12 @@ def create_nodes_files():
         if 'products' in json_companie:
             for product in json_companie['products']:
                 # Node
-                csv_product = format(product, VAR_PRODUCTS)
-                products_writer.writerow([index_products] + csv_product)
-                index_products += 1
+                if product['permalink'] not in products_permalinks:
+                    csv_product = format(product, VAR_PRODUCTS)
+                    products_writer.writerow(
+                        [index_products] + csv_product)
+                    products_permalinks.append(product['permalink'])
+                    index_products += 1
                 # Relationship
                 csv_companie_product = [
                     index_companies_products, json_companie['permalink'], product['permalink']]
@@ -74,9 +81,12 @@ def create_nodes_files():
         # Persons
         if 'relationships' in json_companie:
             for relationship in json_companie['relationships']:
-                csv_person = format(relationship['person'], VAR_PERSONS)
-                persons_writer.writerow([index_persons] + csv_person)
-                index_persons += 1
+                if relationship['person']['permalink'] not in persons_permalinks:
+                    csv_person = format(relationship['person'], VAR_PERSONS)
+                    persons_writer.writerow([index_persons] + csv_person)
+                    persons_permalinks.append(
+                        relationship['person']['permalink'])
+                    index_persons += 1
 
         # Competitors
         if 'competitions' in json_companie:
@@ -106,7 +116,6 @@ def format(dictionary, var_array):
         else:
             line.append(dictionary[var])
     return line
-
 
  # Call main
 create_nodes_files()
