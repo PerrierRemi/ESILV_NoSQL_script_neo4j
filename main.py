@@ -15,6 +15,9 @@ VAR_PRODUCTS = ['name', 'permalink']
 VAR_PERSONS = ['first_name', 'last_name', 'permalink']
 # Relationships
 VAR_COMPANIES_PERSONS = ['is_past', 'title']
+VAR_COMPANIES_ACQUISITOR = ['price_amount', 'price_currencyc_code', 'term_code',
+                            'source_url', 'source_description', 'acquired_year',
+                            'acquired_month', 'acquired_day']
 
 
 def create_files():
@@ -29,6 +32,8 @@ def create_files():
         'companies_competitors.csv', 'w', encoding='utf-8')
     companies_persons_file = open(
         'companies_persons.csv', 'w', encoding='utf-8')
+    companies_acquisitor_file = open(
+        'companies_acquisitor.csv', 'w', encoding='utf-8')
 
     # Writers and headlines
     companies_writer = csv.writer(companies_file)
@@ -51,6 +56,10 @@ def create_files():
     comapnies_persons_writer = csv.writer(companies_persons_file)
     comapnies_persons_writer.writerow(
         ['companie_permalink', 'person_permalink'] + VAR_COMPANIES_PERSONS)
+
+    companies_acquisitor_writer = csv.writer(companies_acquisitor_file)
+    companies_acquisitor_writer.writerow(
+        ['companie_permalink', 'acquisitor_permalink'] + VAR_COMPANIES_ACQUISITOR)
 
     # Read data and write to csv
     # Unique identifiers
@@ -99,6 +108,12 @@ def create_files():
                 companies_competitors_writer.writerow(csv_companie_competitor)
         line = data.readline()
 
+        # Acquisitor
+        if 'acquisition' in json_companie and json_companie['acquisition'] != None:
+            csv_companie_acquisitor = [json_companie['permalink'], json_companie['acquisition']
+                                       ['acquiring_company']['permalink']] + format(json_companie['acquisition'], VAR_COMPANIES_ACQUISITOR)
+            companies_acquisitor_writer.writerow(csv_companie_acquisitor)
+
     # Close all files
     data.close()
     companies_file.close()
@@ -107,6 +122,7 @@ def create_files():
     companies_products_file.close()
     companies_competitors_file.close()
     companies_persons_file.close()
+    companies_acquisitor_file.close()
 
 
 def format(dictionary, var_array):
@@ -125,6 +141,7 @@ def format(dictionary, var_array):
         else:
             line.append(dictionary[var])
     return line
+
 
  # Call main
 create_files()

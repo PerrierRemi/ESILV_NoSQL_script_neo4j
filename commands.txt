@@ -50,4 +50,22 @@ create (product) -[:is_produced_by] -> (companie)
 load csv with headers from "file:/companies_persons.csv" as l
 merge(companie:Companie{permalink:l.companie_permalink})
 merge(person:Person{permalink:l.person_permalink})
-create (person) -[:is_in_relationship_with {is_past:l.is_past, title:l.title}] -> (companie)
+create (person) -[:is_in_relationship_with 
+{is_past:l.is_past, 
+title:l.title}] 
+-> (companie)
+
+// Load companies_acquisitor.csv
+load csv with headers from "file:/companies_acquisitor.csv" as l
+merge(companie:Companie{permalink:l.companie_permalink})
+merge(acquisitor:Companie{permalink:l.acquisitor_permalink})
+create (companie) -[:acquired_by
+{price_amount:toInteger(l.price_amount),
+price_currency_code:l.price_currency_code,
+term_code:l.term_code,
+source_url:l.source_url,
+suorce_description:l.suorce_description,
+acquired_year:toInteger(l.acquired_year),
+acquired_month:toInteger(l.acquired_month),
+acquired_day:toInteger(l.acquired_day)}]
+-> (acquisitor)
