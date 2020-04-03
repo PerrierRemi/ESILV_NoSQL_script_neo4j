@@ -19,7 +19,8 @@ email_adress:l.email_address,
 phone_number:l.phone_numer,
 description:l.description,
 created_at:l.created_at,
-updated_at:l.updated_at});
+updated_at:l.updated_at,
+total_money_raised:l.total_money_raised});
 
 // Load products.csv
 load csv with headers from "file:/products.csv" as l
@@ -44,3 +45,9 @@ load csv with headers from "file:/companies_products.csv" as l
 merge(companie:Companie{permalink:l.companie_permalink})
 merge(product:Product{permalink:l.product_permalink})
 create (product) -[:is_produced_by] -> (companie)
+
+// Load companies_persons.csv
+load csv with headers from "file:/companies_persons.csv" as l
+merge(companie:Companie{permalink:l.companie_permalink})
+merge(person:Person{permalink:l.person_permalink})
+create (person) -[:is_in_relationship_with {is_past:l.is_past, title:l.title}] -> (companie)
