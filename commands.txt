@@ -1,8 +1,8 @@
 // Load companies.csv
 load csv with headers from "file:/companies.csv" as l 
 create(Companies:Companie{
-id:toInteger(l.index),
-name:l.name, 
+name:l.name,
+permalink:l.permalink,
 crunchbase_url:l.crunchbase_url, 
 homepage_url:l.homepage_url, 
 blog_feed_url:l.blog_feed_url, 
@@ -24,17 +24,20 @@ updated_at:l.updated_at});
 // Load products.csv
 load csv with headers from "file:/products.csv" as l
 create(Products:Product{
-id:toInteger(l.index),
 name:l.name,
 permalink:l.permalink});
 
 // Load persons.csv
 load csv with headers from "file:/persons.csv" as l
 create(Persons:Person{
-id:toInteger(l.index),
 first_name:l.first_name,
 last_name:l.last_name,
 permalink:l.permalink});
+
+// Create index
+create index on :Companie(permalink);
+create index on :Product(permalink);
+create index on :Person(permalink);
 
 // Load companies_products.csv
 load csv with headers from "file:/companies_products.csv" as l
