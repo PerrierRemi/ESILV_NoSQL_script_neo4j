@@ -13,12 +13,15 @@ VAR_COMPANIES = ['name', 'permalink', 'crunchbase_url', 'homepage_url',
                  'total_money_raised']
 VAR_PRODUCTS = ['name', 'permalink']
 VAR_PERSONS = ['first_name', 'last_name', 'permalink']
+VAR_OFFICES = ['address1', 'address2', 'zip_code',
+               'city', 'state_code', 'country_code']
 # Relationships
 VAR_COMPANIES_PERSONS = ['is_past', 'title']
 VAR_COMPANIES_ACQUISITOR = ['price_amount', 'price_currencyc_code', 'term_code',
                             'source_url', 'source_description', 'acquired_year',
                             'acquired_month', 'acquired_day']
 VAR_COMPANIES_ACQUISITIONS = VAR_COMPANIES_ACQUISITOR
+VAR_COMPANIES_OFFICES = ['description']
 
 
 def create_files():
@@ -27,6 +30,7 @@ def create_files():
     companies_file = open('companies.csv', 'w', encoding='utf-8')
     products_file = open('products.csv', 'w', encoding='utf-8')
     persons_file = open('persons.csv', 'w', encoding='utf-8')
+    offices_file = open('offices.csv', 'w', encoding='utf-8')
     companies_products_file = open(
         'companies_products.csv', 'w', encoding='utf-8')
     companies_competitors_file = open(
@@ -37,6 +41,8 @@ def create_files():
         'companies_acquisitor.csv', 'w', encoding='utf-8')
     companies_acquisitions_file = open(
         'companies_acquisitions.csv', 'w', encoding='utf-8')
+    companies_offices_file = open(
+        'companies_offices.csv', 'w', encoding='utf-8')
 
     # Writers and headlines
     companies_writer = csv.writer(companies_file)
@@ -47,6 +53,9 @@ def create_files():
 
     persons_writer = csv.writer(persons_file)
     persons_writer.writerow(VAR_PERSONS)
+
+    offices_writer = csv.writer(offices_file)
+    offices_writer.writerow(['index'] + VAR_OFFICES)
 
     companies_products_writer = csv.writer(companies_products_file)
     companies_products_writer.writerow(
@@ -68,11 +77,17 @@ def create_files():
     companies_acquisitions_writer.writerow(
         ['companie_permalink', 'acquisition_permalink'] + VAR_COMPANIES_ACQUISITIONS)
 
+    companies_offices_writer = csv.writer(companies_offices_file)
+    companies_offices_writer.writerow(
+        ['companie_permalink', 'office_index'] + VAR_COMPANIES_OFFICES)
+
     # Read data and write to csv
     # Unique identifiers
     products_permalinks = []
     persons_permalinks = []
     acquisitors_acquisitions_permalinks = []
+
+    index_offices = 1
 
     line = data.readline()
     while line:
@@ -118,22 +133,39 @@ def create_files():
 
         # Acquisitor
         if 'acquisition' in json_companie and json_companie['acquisition'] != None:
-            acquisitor_acquisition = [
-                json_companie['acquisition']['acquiring_company']['permalink'], json_companie['permalink']]
-            acquisitors_acquisitions_permalinks.append(acquisitor_acquisition)
-            csv_companie_acquisitor = [json_companie['permalink'], json_companie['acquisition']
-                                       ['acquiring_company']['permalink']] + \
-                format(json_companie['acquisition'], VAR_COMPANIES_ACQUISITOR)
-            companies_acquisitor_writer.writerow(csv_companie_acquisitor)
+            # Check if the relation is already stored
+            if [json_companie['acquisition']['acquiring_company']['permalink'], json_companie['permalink']] not in acquisitors_acquisitions_permalinks:
+                csv_companie_acquisitor = [json_companie['permalink'], json_companie['acquisition']
+                                           ['acquiring_company']['permalink']] + format(json_companie['acquisition'], VAR_COMPANIES_ACQUISITOR)
+                companies_acquisitor_writer.writerow(csv_companie_acquisitor)
+
+                acquisitors_acquisitions_permalinks.append(
+                    [json_companie['acquisition']['acquiring_company']['permalink'], json_companie['permalink']])
 
         # Acquisitions
         if 'acquisitions' in json_companie and json_companie['acquisitions'] != None:
             for acquisition in json_companie['acquisitions']:
+                # Check if the relation is already stored
                 if not [json_companie['permalink'], acquisition['company']['permalink']] in acquisitors_acquisitions_permalinks:
                     csv_companie_acquisition = [
                         json_companie['permalink'], acquisition['company']['permalink']] + format(acquisition, VAR_COMPANIES_ACQUISITIONS)
                     companies_acquisitions_writer.writerow(
                         csv_companie_acquisition)
+
+                    acquisitors_acquisitions_permalinks.append(
+                        [json_companie['permalink'], acquisition['company']['permalink']])
+
+        # Offices
+        if 'offices' in json_companie and json_companie['offices'] != None:
+            for office in json_companie['offices']:
+                # Node
+                csv_office = [index_offices] + format(office, VAR_OFFICES)
+                offices_writer.writerow(csv_office)
+                # Relationship
+                csv_companie_office = [
+                    json_companie['permalink'], index_offices] + format(office, VAR_COMPANIES_OFFICES)
+                companies_offices_writer.writerow(csv_companie_office)
+                index_offices += 1
 
     # Close all files
     data.close()
@@ -163,6 +195,7 @@ def format(dictionary, var_array):
         else:
             line.append(dictionary[var])
     return line
+
 
  # Call main
 create_files()

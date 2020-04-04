@@ -35,10 +35,22 @@ first_name:l.first_name,
 last_name:l.last_name,
 permalink:l.permalink});
 
+// Load offices.csv
+load csv with headers from "file:/offices.csv" as l
+create(Offices:Office{
+index:toInteger(l.index),
+address1:l.address1,
+address2:l.address2,
+zip_code:l.zip_code,
+state_code:l.state_code,
+country_code:l.country_code
+});
+
 // Create index
 create index on :Companie(permalink);
 create index on :Product(permalink);
 create index on :Person(permalink);
+create index on :Office(index);
 
 // Load companies_products.csv
 load csv with headers from "file:/companies_products.csv" as l
@@ -64,7 +76,7 @@ create (companie) -[:acquired_by
 price_currency_code:l.price_currency_code,
 term_code:l.term_code,
 source_url:l.source_url,
-suorce_description:l.suorce_description,
+source_description:l.source_description,
 acquired_year:toInteger(l.acquired_year),
 acquired_month:toInteger(l.acquired_month),
 acquired_day:toInteger(l.acquired_day)}]
@@ -79,8 +91,16 @@ create (acquisition) -[:acquired_by
 price_currency_code:l.price_currency_code,
 term_code:l.term_code,
 source_url:l.source_url,
-suorce_description:l.suorce_description,
+source_description:l.source_description,
 acquired_year:toInteger(l.acquired_year),
 acquired_month:toInteger(l.acquired_month),
 acquired_day:toInteger(l.acquired_day)}]
 -> (companie)
+
+// Load companies_offices.csv
+load csv with headers from "file:/companies_offices.csv" as l
+merge(companie:Companie{permalink:l.companie_permalink})
+merge(office:Office{index:toInteger(l.office_index)})
+create (companie) -[:is_based_in
+{description:l.description}]
+-> (office)
