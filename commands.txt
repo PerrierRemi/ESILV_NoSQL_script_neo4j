@@ -67,6 +67,12 @@ create (person) -[:is_in_relationship_with
 title:l.title}] 
 -> (companie)
 
+// Load companies_competitors.csv
+load csv with headers from "file:/companies_competitors.csv" as l
+merge(companie:Companie{permalink:l.companie_permalink})
+merge(competitor:Companie{permalink:l.competitor_permalink})
+create (companie) -[:is_in_competition_with]-> (competitor)
+
 // Load companies_acquisitor.csv
 load csv with headers from "file:/companies_acquisitor.csv" as l
 merge(companie:Companie{permalink:l.companie_permalink})
