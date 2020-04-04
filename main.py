@@ -17,7 +17,7 @@ VAR_OFFICES = ['address1', 'address2', 'zip_code',
                'city', 'state_code', 'country_code']
 # Relationships
 VAR_COMPANIES_PERSONS = ['is_past', 'title']
-VAR_COMPANIES_ACQUISITOR = ['price_amount', 'price_currencyc_code', 'term_code',
+VAR_COMPANIES_ACQUISITOR = ['price_amount', 'price_currency_code', 'term_code',
                             'source_url', 'source_description', 'acquired_year',
                             'acquired_month', 'acquired_day']
 VAR_COMPANIES_ACQUISITIONS = VAR_COMPANIES_ACQUISITOR

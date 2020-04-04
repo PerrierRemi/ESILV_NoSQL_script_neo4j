@@ -1,3 +1,3 @@
 # Ignore csv and json in main directory
-.*.csv
+/*.csv
 *.json
