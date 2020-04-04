@@ -18,6 +18,7 @@ VAR_COMPANIES_PERSONS = ['is_past', 'title']
 VAR_COMPANIES_ACQUISITOR = ['price_amount', 'price_currencyc_code', 'term_code',
                             'source_url', 'source_description', 'acquired_year',
                             'acquired_month', 'acquired_day']
+VAR_COMPANIES_ACQUISITIONS = VAR_COMPANIES_ACQUISITOR
 
 
 def create_files():
@@ -34,6 +35,8 @@ def create_files():
         'companies_persons.csv', 'w', encoding='utf-8')
     companies_acquisitor_file = open(
         'companies_acquisitor.csv', 'w', encoding='utf-8')
+    companies_acquisitions_file = open(
+        'companies_acquisitions.csv', 'w', encoding='utf-8')
 
     # Writers and headlines
     companies_writer = csv.writer(companies_file)
@@ -61,10 +64,15 @@ def create_files():
     companies_acquisitor_writer.writerow(
         ['companie_permalink', 'acquisitor_permalink'] + VAR_COMPANIES_ACQUISITOR)
 
+    companies_acquisitions_writer = csv.writer(companies_acquisitions_file)
+    companies_acquisitions_writer.writerow(
+        ['companie_permalink', 'acquisition_permalink'] + VAR_COMPANIES_ACQUISITIONS)
+
     # Read data and write to csv
     # Unique identifiers
     products_permalinks = []
     persons_permalinks = []
+    acquisitors_acquisitions_permalinks = []
 
     line = data.readline()
     while line:
@@ -110,9 +118,22 @@ def create_files():
 
         # Acquisitor
         if 'acquisition' in json_companie and json_companie['acquisition'] != None:
+            acquisitor_acquisition = [
+                json_companie['acquisition']['acquiring_company']['permalink'], json_companie['permalink']]
+            acquisitors_acquisitions_permalinks.append(acquisitor_acquisition)
             csv_companie_acquisitor = [json_companie['permalink'], json_companie['acquisition']
-                                       ['acquiring_company']['permalink']] + format(json_companie['acquisition'], VAR_COMPANIES_ACQUISITOR)
+                                       ['acquiring_company']['permalink']] + \
+                format(json_companie['acquisition'], VAR_COMPANIES_ACQUISITOR)
             companies_acquisitor_writer.writerow(csv_companie_acquisitor)
+
+        # Acquisitions
+        if 'acquisitions' in json_companie and json_companie['acquisitions'] != None:
+            for acquisition in json_companie['acquisitions']:
+                if not [json_companie['permalink'], acquisition['company']['permalink']] in acquisitors_acquisitions_permalinks:
+                    csv_companie_acquisition = [
+                        json_companie['permalink'], acquisition['company']['permalink']] + format(acquisition, VAR_COMPANIES_ACQUISITIONS)
+                    companies_acquisitions_writer.writerow(
+                        csv_companie_acquisition)
 
     # Close all files
     data.close()
@@ -123,6 +144,7 @@ def create_files():
     companies_competitors_file.close()
     companies_persons_file.close()
     companies_acquisitor_file.close()
+    companies_acquisitions_file.close()
 
 
 def format(dictionary, var_array):
@@ -141,7 +163,6 @@ def format(dictionary, var_array):
         else:
             line.append(dictionary[var])
     return line
-
 
  # Call main
 create_files()

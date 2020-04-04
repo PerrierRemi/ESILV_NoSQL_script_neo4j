@@ -69,3 +69,18 @@ acquired_year:toInteger(l.acquired_year),
 acquired_month:toInteger(l.acquired_month),
 acquired_day:toInteger(l.acquired_day)}]
 -> (acquisitor)
+
+// Load companies_acquisitions.csv
+load csv with headers from "file:/companies_acquisitions.csv" as l
+merge(companie:Companie{permalink:l.companie_permalink})
+merge(acquisition:Companie{permalink:l.acquisition_permalink})
+create (acquisition) -[:acquired_by
+{price_amount:toInteger(l.price_amount),
+price_currency_code:l.price_currency_code,
+term_code:l.term_code,
+source_url:l.source_url,
+suorce_description:l.suorce_description,
+acquired_year:toInteger(l.acquired_year),
+acquired_month:toInteger(l.acquired_month),
+acquired_day:toInteger(l.acquired_day)}]
+-> (companie)
